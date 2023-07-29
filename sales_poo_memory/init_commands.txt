@@ -1,0 +1,12 @@
+=========================================
+|      SALES SYSTEM WITH PYTHON-OO      |
+=========================================
+
+1) command to run file
+
+> python test.py
+
+2) commands to upload files to github
+
+> 
+
