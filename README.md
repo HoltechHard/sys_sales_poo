@@ -61,7 +61,7 @@ date: 2023-07-29 16:07:44.816735+00:00   ---  order-id = A002 ==> total = 638.5
 date: 2023-07-29 16:07:44.816735+00:00   ---  order-id = A004 ==> total = 245.0  
 date: 2023-07-29 16:07:44.816735+00:00   ---  order-id = A005 ==> total = 628.0  
 
---- List of suppliers ---
+--- List of suppliers ---  
 id: 4 | name: Karina | num-orders: 2  
 id: 5 | name: Fernando | num-orders: 3  
 
