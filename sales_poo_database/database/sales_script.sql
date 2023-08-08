@@ -188,3 +188,8 @@ select * from orderdetail;
 # calculate accumulate for all generated orders
 select sum(total) from `order`;
 select sum(acc_all_orders) from supplier;
+
+# privileges for database
+show grants for 'root'@'localhost';
+grant all privileges on db_sales.* to 'root'@'localhost';
+flush privileges;
