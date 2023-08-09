@@ -59,7 +59,7 @@ insert into product(bar_code, name, description, unit_price, Category_id_categor
 
 select * from product;
 
-#		--- PROCEDURES AND TRIGGERS	---
+#			--- PROCEDURES AND TRIGGERS	---
 
 # store procedure to calculate subtotal
 delimiter $$
