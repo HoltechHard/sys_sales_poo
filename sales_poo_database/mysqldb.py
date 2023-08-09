@@ -1,5 +1,6 @@
 # class database
 import mysql.connector
+from config import settings
 
 class MysqlConnect:
     def __init__(self, host, user, password, database):
@@ -7,7 +8,7 @@ class MysqlConnect:
         self.user = user
         self.password = password
         self.database = database
-        self.cnn = None
+        self.cnn = None        
 
     def connect(self):
         self.cnn = mysql.connector.connect(
@@ -43,10 +44,15 @@ class MysqlConnect:
 
         return result
 
+    def execute_procedure_query(self, sp_name, *args):
+        cursor = self.cnn.cursor()
+        cursor.callproc(sp_name, args)
+        rows_data = []
+        for result in cursor.stored_results():
+            rows_data.extend(result.fetchall())
+        cursor.close()
+
+        return rows_data
+            
 # settings for mysql connection
-mysql_cnn = MysqlConnect(
-    host = "localhost",
-    user = "root",
-    password = "$holtech123",
-    database = "db_sales"
-)
+mysql_cnn = MysqlConnect(**settings)
