@@ -1,4 +1,5 @@
 # sys_sales_python_poo
+Small system for orders control using python-OO from scratch    
 
 ## Stage 1  
 Approach of solution:  
@@ -107,7 +108,7 @@ Accumulate of all orders: ----------------------------- 1988.0
 
 ## Stage 2  
 Approach of solution:  
-Python object-oriented without framework with mysql database  
+Python object-oriented without framework with mysql database storage  
 
 ### Database model:  
 ![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/cc553fb6-e5ac-4d8f-a246-536251437d4a)  
