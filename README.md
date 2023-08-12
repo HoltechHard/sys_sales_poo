@@ -105,3 +105,28 @@ Total for order A005: ------------------------- 628.0
 Accumulate of all orders: ----------------------------- 1988.0  
 
 
+## Stage 2  
+Approach of solution:  
+Python object-oriented without framework with mysql database  
+
+### Database model:  
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/cc553fb6-e5ac-4d8f-a246-536251437d4a)  
+
+### Database components:  
+Tables: 9  
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/aa2859d0-684f-41c3-b227-15027a9789fa)  
+Views: 9  
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/f518fed3-d606-496c-92ee-0990b9d277de)  
+Store procedures: 18 and Cursor: 1  
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/e479aaa3-8483-4a85-9bef-da4788fe5a55)  
+Triggers: 3  
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/6e8aad4f-7aae-42ee-b572-61e57ddad303)  
+
+### Results:  
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/7b7e0f36-e45e-43fc-939c-c449301b9e25) 
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/391a2aef-9b6d-498e-9fda-bbe7fa19e6d9)
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/774655a1-a458-4dd7-aa6d-c12b3d19e6b8)
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/391c79b1-3724-4f5c-8f3c-5b0ed399459c)
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/fe3ac579-5c44-4cfb-8551-782e7e9feb3c)
+![image](https://github.com/HoltechHard/sys_sales_poo/assets/35493202/24e61f8b-ba45-4feb-a5e0-6a6844284496)
+
