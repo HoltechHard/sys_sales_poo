@@ -106,6 +106,17 @@ delimiter ;
 
 call sp_ord_by_supplier(7);
 
+# view to calculate number of orders and accumulate money
+# for each supplier
+create view vw_ord_by_supplier as
+select ord.Supplier_Person_id_person as supplier_id, 
+		count(ord.id_order) as supplier_num_orders,
+		sum(ord.total) as supplier_acc_orders
+from `order` ord
+group by ord.Supplier_Person_id_person;
+
+select * from vw_ord_by_supplier;
+
 #				--- table category ---
 # procedures and views for category
 
@@ -258,5 +269,102 @@ delimiter ;
 
 call sp_prod_by_category(1);
 
-select * from category;
+# 				--- table order ---
+# procedures and views for order
 
+# view to list orders
+create view vw_order as
+select ord.id_order, ord.date_generated, p.name as sup_name, ord.total
+from `order` ord
+inner join supplier s
+on ord.Supplier_Person_id_person = s.Person_id_person
+inner join Person p
+on s.Person_id_person = p.id_person
+order by ord.id_order;
+
+select * from vw_order;
+
+# view to list accumulate of all orders
+create view vw_total_orders as 
+select sum(total) as tot_ords 
+from `order`;
+
+select * from vw_total_orders;
+
+# view to calculate accumulate details by order
+create view vw_details_by_order as
+select od.Order_id_order as id_order, 
+		sum(od.subtotal) as accumulate
+from orderdetail od
+group by od.Order_id_order;
+
+select * from vw_details_by_order;
+
+# store procedure to insert orders
+delimiter $$
+create procedure sp_order_insert(
+	in o_id varchar(8),
+    in s_id int
+)
+begin
+	insert into `order`(id_order, date_generated, total, Supplier_Person_id_person)
+    values(o_id, now(), 0.0, s_id);
+end $$
+delimiter ;
+
+#				--- table orderdetail ---
+# procedure and views for orderdetail
+
+# store procedure to list orderdetails
+delimiter $$
+create procedure sp_details_by_order(in id_order varchar(8))
+begin
+	select p.name as pr_name, p.unit_price, od.quantity, od.subtotal
+    from orderdetail od
+    inner join product p
+    on od.Product_id_product = p.id_product
+    where od.Order_id_order = id_order
+    order by od.Product_id_product;
+end $$
+delimiter ;
+
+call sp_details_by_order("A001");
+
+# store procedure to insert orderdetail
+delimiter $$
+create procedure sp_detail_insert(
+	in o_id varchar(8),
+    in p_id int,
+    in od_quantity int
+)
+begin
+	insert into orderdetail(Order_id_order, Product_id_product, quantity, subtotal)
+    values(o_id, p_id, od_quantity, 0.0);
+end $$
+delimiter ;
+
+# example to insert order
+call sp_order_insert("A006", 10);
+
+# example to insert orderdetail
+call sp_detail_insert("A006", 8, 1);
+call sp_detail_insert("A006", 7, 2);
+
+# store procedure to edit detail
+delimiter $$
+create procedure sp_detail_edit(
+	in o_id int,
+    in p_id int,
+    in od_quantity int
+)
+begin
+	update orderdetail od
+		set od.Product_id_product = p_id, od.quantity = od_quantity
+    where od.Order_id_order = o_id;
+end $$
+delimiter ;
+
+select * from product;
+select * from supplier;
+select * from `order`;
+select * from orderdetail;
