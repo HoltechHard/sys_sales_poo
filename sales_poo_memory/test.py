@@ -21,13 +21,13 @@ def generate_category():
 def generate_products():
     # create the objects
     pr1 = Product(1, Category.lst_categories[0], 
-                  "nike black shoes", "footwear for men", 30.0)
+                  "nike black shoes", "footwear for man", 30.0)
     pr2 = Product(2, Category.lst_categories[0], 
                   "pink havaianas", "footwear for women", 9.50)
     pr3 = Product(3, Category.lst_categories[0], 
-                  "brown boots", "footwear for men", 55.0)
+                  "brown boots", "footwear for man", 55.0)
     pr4 = Product(4, Category.lst_categories[1],
-                  "black jacket", "clothes for men", 110.0)
+                  "black jacket", "clothes for man", 110.0)
     pr5 = Product(4, Category.lst_categories[2], 
                   "full stack django and react", "packt pub book", 39.0)
     pr6 = Product(5, Category.lst_categories[2], 
