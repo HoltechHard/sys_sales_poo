@@ -1,6 +1,7 @@
 # models
 
 from mysqldb import mysql_cnn
+from typing import List
 
 # class Person
 
@@ -24,9 +25,9 @@ class Person:
         return res
 
     # print person
-    def print_person(result):
+    def print_person():
         print(" --- List of persons --- ")
-        for row in result:
+        for row in Person.list_person():
             print(f"id: {row[0]} | name: {row[1]} | email: {row[2]} | "
                   f"company: {row[3]} | type: {row[4]}")
 
@@ -75,9 +76,9 @@ class Supplier:
 
         return res
 
-    def print_supplier(result):
+    def print_supplier():
         print(" --- List of suppliers --- ")
-        for row in result:
+        for row in Supplier.list_supplier():
             print(f"id: {row[0]} | name: {row[1]} | status: {row[2]} | "
                   f"num-orders: {row[3]} | accumulate-orders: $ {row[4]}")
 
@@ -154,9 +155,9 @@ class Category:
         return res
     
     # print category
-    def print_category(result):
+    def print_category():
         print(" --- List of Categories --- ")
-        for row in result:
+        for row in Category.list_category():
             print(f"id: {row[0]} | name: {row[1]}")
 
     # insert category
@@ -203,9 +204,9 @@ class Brand:
         return res
 
     # print brand    
-    def print_brand(result):
+    def print_brand():
         print(" --- List of Brands --- ")
-        for row in result:
+        for row in Brand.list_brand():
             print(f"id: {row[0]} | name: {row[1]} | date-creation: {row[2]}")
 
     # insert brand
@@ -257,9 +258,9 @@ class Product:
         return res
 
     # print product
-    def print_product(result):
+    def print_product():
         print(" --- List of Products --- ")
-        for row in result:
+        for row in Product.list_product():
             print(f"id: {row[0]} | bar-code: {row[1]} | product: {row[2]} | category: {row[3]} | ")
             print(f"brand: {row[4]} | description: {row[5]} | unit-price: $ {row[6]}")
 
@@ -306,8 +307,8 @@ class Product:
         for cat in Category.list_category():
             c_id = cat[0]
             print(f"id-category: {cat[0]} | category: {cat[1]}")
-            print("-----------------------------------------------")
             print("Products: ")
+            print("-----------------------------------------------")            
 
             ls_prod = Product.list_prod_by_category(c_id)
             
@@ -318,36 +319,152 @@ class Product:
             else:
                 print(f"category {cat[1]} doesnt have products")
 
+
+# class Order Detail
+
+class OrderDetail:
+
+    # constructor for class Orderdetail
+    def __init__(self, o_id, p_id, od_quantity):
+        self.order = o_id
+        self.product = p_id
+        self.quantity = od_quantity        
+
+    # list orderdetail
+    def list_details(id_order):
+        mysql_cnn.connect()
+        procedure = "sp_details_by_order"
+        res = mysql_cnn.execute_procedure_query(procedure, id_order)
+        mysql_cnn.close()
+
+        return res
+
+    # insert orderdetail
+    def insert_details(self):
+        mysql_cnn.connect()
+        procedure = "sp_detail_insert"
+        res = mysql_cnn.execute_sprocedure(procedure, self.order,
+                    self.product, self.quantity)
+        mysql_cnn.close()
+
+        return res
+
+# class Order
+
+class Order:
+
+    # constructor for class Order
+    def __init__(self, o_id, s_id, details: List["OrderDetail"]):
+        self.id = o_id        
+        self.supplier = s_id
+        self.details = details        
+
+    # list orders
+    def list_orders():
+        mysql_cnn.connect()
+        query = "select * from vw_order"
+        res = mysql_cnn.execute_query(query)
+        mysql_cnn.close()
+
+        return res
+
+    # show accumullate for all orders
+    def show_accumulate_ords():
+        mysql_cnn.connect()
+        query = "select * from vw_total_orders"
+        res = mysql_cnn.execute_query(query)
+        mysql_cnn.close()
+
+        for row in res:
+            acc = row[0]
+        
+        return acc
+    
+    # insert orders with details
+    def insert_order(self):
+        mysql_cnn.connect()
+        procedure = "sp_order_insert"
+        res = mysql_cnn.execute_sprocedure(procedure, self.id, self.supplier)
+        mysql_cnn.close()
+
+        if res == 1:
+            if self.details:
+                items = 0
+                for detail in self.details:                
+                    items += 1
+                    OrderDetail(detail.order, detail.product, detail.quantity).insert_details()
+                print(f"Order inserted with {items} items")
+            else:
+                print("The order doesnt have details")
+        else:
+            print("Order not inserted")
+
+    # print orders
+    def print_orders():
+        print(" --- List of orders --- ")
+
+        for ord in Order.list_orders():
+            print(f"id-order: {ord[0]} | date-generated: {ord[1]} | "
+                  f"supplier: {ord[2]} | total: {ord[3]}")
+
+    # print details by order
+    def print_details_by_order():
+        print(" --- List of orders with items --- ")
+
+        for ord in Order.list_orders():
+            o_id = ord[0]
+            print(f"id-order: {ord[0]} | date-generated: {ord[1]} | "
+                  f"supplier: {ord[2]}")
+            print("Order Detail:")
+            print("-------------------------------------------------------")
+            
+            ls_details = OrderDetail.list_details(o_id)
+            
+            i = 0
+            if ls_details:
+                for item in ls_details:
+                    i += 1
+                    print(f"Item {i} ==> Product: {item[0]} | "
+                          f"Unit-price: {item[1]} | Qty: {item[2]} | "
+                          f"Subtotal: $ {item[3]}")
+            print(f"Total for order {ord[0]}: -------------------------------------- $ {ord[3]}")
+        print(f"Accumulate for all orders: ---------------------------------------------------- "
+              f"$ {Order.show_accumulate_ords()}")
+
 def main():
     
     # Person(None, "Juan", "juan@gmail.com", 1, 3).insert_person()
     # Person(10, "Juan", "juan123@gmail.com", 1, 2).edit_person()
-    persons = Person.list_person()
-    Person.print_person(persons)
+    Person.print_person()
 
     # Supplier(10, "inactive supplier").insert_supplier()
     # Supplier(10, "active supplier").edit_supplier()
-    suppliers = Supplier.list_supplier()
-    Supplier.print_supplier(suppliers)
+    Supplier.print_supplier()
     Supplier.print_ord_by_supplier()
 
     # Category(None, "fragance").insert_category()
     # Category(6, "luxury goods").edit_category()
-    categories = Category.list_category()
-    Category.print_category(categories)
+    Category.print_category()
 
     # Brand(None, "Dior", "1946-12-16").insert_brand()
     # Brand(8, "Dior's", "1946-12-16").edit_brand()
-    brands = Brand.list_brand()
-    Brand.print_brand(brands)
+    Brand.print_brand()
 
     # Product(None, "X01-5616-592", "Cristian Dior perfume", "spray perfume", 
     #                       10.0, 6, 8).insert_product()
     # Product(10, "X01-7878-512", "Miss Dior Eau perfume", "spray perfume for women", 
     #                       12.0, 6, 8).edit_product()
-    products = Product.list_product()
-    Product.print_product(products)
+    Product.print_product()
     Product.print_prod_by_category()
+
+    # Order("A007", 6, [
+    #    OrderDetail("A007", p_id = 1, od_quantity = 2),
+    #    OrderDetail("A007", p_id = 4, od_quantity = 2),
+    #    OrderDetail("A007", p_id = 6, od_quantity = 1),
+    #    OrderDetail("A007", p_id = 10, od_quantity = 3)
+    # ]).insert_order()
+    Order.print_orders()
+    Order.print_details_by_order()
 
 if __name__ == "__main__":
     main()
