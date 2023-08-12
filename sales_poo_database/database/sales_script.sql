@@ -61,39 +61,48 @@ select * from product;
 
 #			--- PROCEDURES AND TRIGGERS	---
 
-# store procedure to calculate subtotal
+# trigger to calculate subtotal in orderdetail
+drop trigger if exists trg_calculate_subtotal;
 delimiter $$
-create procedure sp_calculate_subtotal()
-begin
-	update orderdetail od
-	inner join product pr 
-	on od.Product_id_product = pr.id_product
-		set od.subtotal = od.quantity * pr.unit_price;
+create trigger trg_calculate_subtotal
+before insert on orderdetail
+for each row
+begin    
+    # update subtotal in orderdetail
+	set new.subtotal = new.quantity * (select p.unit_price
+							from product p
+                            where p.id_product = new.Product_id_product);
 end $$
 delimiter ;
 
 # trigger to calculate total of orders
-drop trigger trg_calculate_total;
+drop trigger if exists trg_calculate_total;
 delimiter $$
 create trigger trg_calculate_total
-after update on orderdetail
-for each row
+after insert on orderdetail
+for each row 
 begin
-	update `order` ord    
-		set ord.total = ord.total + new.subtotal			
-	where ord.id_order = new.Order_id_order;        
-end $$
+	update `order` ord
+		set ord.total = (select vod.accumulate
+			from vw_details_by_order vod
+            where vod.id_order = new.Order_id_order)
+	where ord.id_order = new.Order_id_order;
+end  $$
 delimiter ;
 
-# trigger to calculate number of orders by supplier
-drop trigger trg_count_orders;
+# trigger to calculate number of orders and accumulate
+# of orders by each supplier
+drop trigger if exists trg_all_ords_by_supplier;
 delimiter $$
-create trigger trg_count_orders
-after insert on `order`
+create trigger trg_all_ords_by_supplier
+after update on `order`
 for each row
-begin
-	update supplier s 
-		set s.num_orders = s.num_orders + 1			
+begin    
+    update supplier s
+    inner join vw_ord_by_supplier obs
+    on s.Person_id_person = obs.supplier_id
+		set s.num_orders = obs.supplier_num_orders, 
+			s.acc_all_orders = obs.supplier_acc_orders
 	where s.Person_id_person = new.Supplier_Person_id_person;
 end $$
 delimiter ;
@@ -109,7 +118,7 @@ begin
     
     -- declare cursor procedure
 	declare cursor_orders cursor for
-		select id_order, total, Supplier_Person_id_person from `order`;
+		select id_order, total, Supplier_Person_id_person from `order`;        
         
 	-- flag with end of data condition
     declare continue handler for not found set @done = TRUE;
@@ -167,7 +176,6 @@ begin
         ("A005", 3, 10, 0.0),
 		("A005", 5, 2, 0.0);
 
-	call sp_calculate_subtotal();
 end $$
 delimiter ;
 
@@ -175,7 +183,7 @@ delimiter ;
 call sp_generate_orders();
 
 # accumulate orders by supplier
-call cur_orders_supplier();
+# call cur_orders_supplier();
 
 # checking the results
 select * from person;
@@ -193,3 +201,50 @@ select sum(acc_all_orders) from supplier;
 show grants for 'root'@'localhost';
 grant all privileges on db_sales.* to 'root'@'localhost';
 flush privileges;
+
+# trigger to calculate total of orders
+/*
+drop trigger trg_calculate_total;
+delimiter $$
+create trigger trg_calculate_total
+after update on orderdetail
+for each row
+begin
+	update `order` ord    
+		set ord.total = ord.total + new.subtotal			
+	where ord.id_order = new.Order_id_order;    
+end $$
+delimiter ;
+*/
+
+# trigger to calculate number of orders by supplier
+/*
+drop trigger trg_count_orders;
+delimiter $$
+create trigger trg_count_orders
+after insert on `order`
+for each row
+begin
+	update supplier s 
+		set s.num_orders = s.num_orders + 1			
+	where s.Person_id_person = new.Supplier_Person_id_person;
+end $$
+delimiter ;
+*/
+
+# trigger to calculate accumulate orders by supplier
+/*
+drop trigger trg_acc_orders_by_supplier;
+delimiter $$ 
+create trigger trg_acc_orders_by_supplier
+after update on `order`
+for each row
+begin
+	if old.total != new.total then
+		update supplier s 
+			set s.acc_all_orders = s.acc_all_orders + new.total
+		where s.Person_id_person = new.Supplier_Person_id_person;
+    end if;
+end $$
+delimiter ;
+*/
